@@ -1,5 +1,6 @@
 package org.nds.dhp.controller;
 
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.rest.client.api.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpMessage;
@@ -7,15 +8,18 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
+import org.nds.dhp.factory.BundleFactory;
 import org.nds.dhp.manager.AccessTokenManager;
 import org.nds.dhp.manager.HttpClientManager;
 import org.nds.dhp.model.DHPTestClient;
+import org.nds.dhp.util.MessageParser;
 import org.nds.dhp.util.ServerProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.ArrayList;
@@ -41,6 +45,8 @@ public class DHPTestClientController {
 
     private DHPTestClient dhpTestClient = new DHPTestClient();
 
+    private int currentMessageType=1;
+
     public DHPTestClientController() {
         accessTokenManager = new AccessTokenManager();
         httpClientManager = new HttpClientManager();
@@ -50,6 +56,7 @@ public class DHPTestClientController {
 
     @GetMapping("/dhptestclient")
     public String handleGetRequest(Model model) {
+        dhpTestClient.setMessageType(currentMessageType);
 
         dhpTestClient.setEndPoint(ServerProperty.getMessageEndpoint());
         model.addAttribute("dhptestclient", dhpTestClient);
@@ -57,14 +64,15 @@ public class DHPTestClientController {
     }
 
     @PostMapping("/dhptestclient")
-    public String handlePostRequest(Model model) {
+    public String handlePostRequest(@ModelAttribute("dhptestclient") DHPTestClient dhpTestClient, Model model) {
 
-        postRequest();
+        currentMessageType = dhpTestClient.getMessageType();
+        postRequest(dhpTestClient.getMessageType());
 
         return "redirect:/dhptestclient";
     }
 
-    private void postRequest() {
+    private void postRequest(int messageType) {
         String token;
         HttpPost httpPost;
         HttpResponse httpResponse;
@@ -73,7 +81,7 @@ public class DHPTestClientController {
 
             token = accessTokenManager.request();
 
-            httpPost = httpClientManager.createHttpPost(ServerProperty.getMessageEndpoint(), createHeaders(token), new StringEntity(data));
+            httpPost = httpClientManager.createHttpPost(ServerProperty.getMessageEndpoint(), createHeaders(token), new StringEntity(createBundleRequest(messageType)));
 
             displayRequest(httpPost);
 
@@ -85,6 +93,18 @@ public class DHPTestClientController {
             logger.error("Unable to process post request");
         }
 
+    }
+
+    private String createBundleRequest(int messageType) throws Exception {
+        Bundle bundle=null;
+
+        if(messageType == 1) {
+            bundle = BundleFactory.createDvaNotif();
+        } else if(messageType == 2) {
+            bundle = BundleFactory.createDvaNotifR_Response();
+        }
+
+        return MessageParser.format(bundle);
     }
 
     private void displayRequest(HttpPost httpPost) throws Exception {

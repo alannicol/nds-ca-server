@@ -3,6 +3,7 @@ package org.nds.dhp.model;
 public class DHPTestClient {
 
     private String endPoint;
+    private int messageType;
     private String requestHeader;
     private String requestBody;
     private String responseHeader;
@@ -14,6 +15,14 @@ public class DHPTestClient {
 
     public void setEndPoint(String endPoint) {
         this.endPoint = endPoint;
+    }
+
+    public int getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(int messageType) {
+        this.messageType = messageType;
     }
 
     public String getRequestHeader() {
