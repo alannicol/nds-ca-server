@@ -51,7 +51,11 @@ public class MessageParser {
         return bundle;
     }
 
-    public static String format(IBaseResource resource) {
+    public static String formatJSON(IBaseResource resource) {
         return fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource);
+    }
+
+    public static String formatXML(IBaseResource resource) {
+        return fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
     }
 }

@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -37,7 +36,8 @@ public class DHPTestClientController {
     private static final String AUTHORIZATION = "Authorization";
     private static final String BEARER = "Bearer";
     private static final String CONTENT_TYPE="Content-Type";
-    private static final String FHIR_JSON="application/xml";
+    private static final String FHIR_JSON="application/json+fhir";
+    private static final String FHIR_XML="application/xml+fhir";
 
     private AccessTokenManager accessTokenManager;
     private HttpClientManager httpClientManager;
@@ -46,6 +46,7 @@ public class DHPTestClientController {
     private DHPTestClient dhpTestClient = new DHPTestClient();
 
     private int currentMessageType=1;
+    private int currentMessageFormat=1;
 
     public DHPTestClientController() {
         accessTokenManager = new AccessTokenManager();
@@ -57,6 +58,7 @@ public class DHPTestClientController {
     @GetMapping("/dhptestclient")
     public String handleGetRequest(Model model) {
         dhpTestClient.setMessageType(currentMessageType);
+        dhpTestClient.setMessageFormat(currentMessageFormat);
 
         dhpTestClient.setEndPoint(ServerProperty.getMessageEndpoint());
         model.addAttribute("dhptestclient", dhpTestClient);
@@ -67,12 +69,13 @@ public class DHPTestClientController {
     public String handlePostRequest(@ModelAttribute("dhptestclient") DHPTestClient dhpTestClient, Model model) {
 
         currentMessageType = dhpTestClient.getMessageType();
-        postRequest(dhpTestClient.getMessageType());
+        currentMessageFormat = dhpTestClient.getMessageFormat();
+        postRequest(dhpTestClient.getMessageType(), dhpTestClient.getMessageFormat());
 
         return "redirect:/dhptestclient";
     }
 
-    private void postRequest(int messageType) {
+    private void postRequest(int messageType, int messageFormat) {
         String token;
         HttpPost httpPost;
         HttpResponse httpResponse;
@@ -81,7 +84,7 @@ public class DHPTestClientController {
 
             token = accessTokenManager.request();
 
-            httpPost = httpClientManager.createHttpPost(ServerProperty.getMessageEndpoint(), createHeaders(token), new StringEntity(createBundleRequest(messageType)));
+            httpPost = httpClientManager.createHttpPost(ServerProperty.getMessageEndpoint(), createHeaders(token, messageFormat), new StringEntity(createBundleRequest(messageType, messageFormat)));
 
             displayRequest(httpPost);
 
@@ -95,8 +98,9 @@ public class DHPTestClientController {
 
     }
 
-    private String createBundleRequest(int messageType) throws Exception {
+    private String createBundleRequest(int messageType, int messageFormat) throws Exception {
         Bundle bundle=null;
+        String request=null;
 
         if(messageType == 1) {
             bundle = BundleFactory.createDvaNotif();
@@ -104,7 +108,13 @@ public class DHPTestClientController {
             bundle = BundleFactory.createDvaNotifR_Response();
         }
 
-        return MessageParser.format(bundle);
+        if(messageFormat == 1) {
+            request = MessageParser.formatXML(bundle);
+        } else if(messageFormat == 2) {
+            request = MessageParser.formatJSON(bundle);
+        }
+
+        return request;
     }
 
     private void displayRequest(HttpPost httpPost) throws Exception {
@@ -136,11 +146,17 @@ public class DHPTestClientController {
         return EntityUtils.toString(httpEntity, "UTF-8");
     }
 
-    private static List<Header> createHeaders(String token) {
+    private static List<Header> createHeaders(String token, int messageFormat) {
         List<Header> headers;
 
         headers = new ArrayList<>();
-        headers.add(new Header(CONTENT_TYPE, FHIR_JSON));
+
+        if(messageFormat == 1) {
+            headers.add(new Header(CONTENT_TYPE, FHIR_XML));
+        } else if(messageFormat == 2) {
+            headers.add(new Header(CONTENT_TYPE, FHIR_JSON));
+        }
+
         headers.add(new Header(AUTHORIZATION, BEARER + " " + token));
 
         return headers;

@@ -4,6 +4,7 @@ public class DHPTestClient {
 
     private String endPoint;
     private int messageType;
+    private int messageFormat;
     private String requestHeader;
     private String requestBody;
     private String responseHeader;
@@ -23,6 +24,14 @@ public class DHPTestClient {
 
     public void setMessageType(int messageType) {
         this.messageType = messageType;
+    }
+
+    public int getMessageFormat() {
+        return messageFormat;
+    }
+
+    public void setMessageFormat(int messageFormat) {
+        this.messageFormat = messageFormat;
     }
 
     public String getRequestHeader() {

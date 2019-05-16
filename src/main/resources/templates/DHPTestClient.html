@@ -38,6 +38,27 @@
                     </div>
                 </div>
             </div>
+            <div class="col">
+                <div class="card">
+                    <h5 class="card-header">Message Format</h5>
+                    <div class="card-body">
+                        <div class="col">
+                            <div class="row">
+                                <div class="form-check-inline">
+                                    <label class="form-check-label" for="radioDvaNotif">
+                                        <input type="radio" class="form-check-input" id="radioXML" name="optradio" th:field="*{messageFormat}" th:value="1" >XML
+                                    </label>
+                                </div>
+                                <div class="form-check-inline">
+                                    <label class="form-check-label" for="radioDvaNotifR">
+                                        <input type="radio" class="form-check-input" id="radioJSON" name="optradio" th:field="*{messageFormat}" th:value="2" >JSON
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="row mt-3">
             <div class="col">

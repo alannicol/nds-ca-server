@@ -14,7 +14,7 @@ public class BundleFactoryTest {
 
         bundle = BundleFactory.createDvaNotif();
 
-        System.out.println(MessageParser.format(bundle));
+        System.out.println(MessageParser.formatJSON(bundle));
 
         assertNotNull(bundle);
     }
@@ -25,7 +25,7 @@ public class BundleFactoryTest {
 
         bundle = BundleFactory.createDvaNotifR_Response();
 
-        System.out.println(MessageParser.format(bundle));
+        System.out.println(MessageParser.formatJSON(bundle));
 
         assertNotNull(bundle);
     }
