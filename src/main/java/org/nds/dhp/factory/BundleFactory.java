@@ -71,7 +71,7 @@ public class BundleFactory {
         patient.setId(new IdDt(UUID.randomUUID().toString()));
         patient.addIdentifier(createPatientIdentifier("https://phfapi.digitalhealthplatform.net/fhir/chinumber", patientIdentifier));
         patient.addName(createName(familyName,givenName));
-        patient.addTelecom(createEmail(email));
+        patient.addContact(createEmail(email));
         patient.addCareProvider().setReference(organization.getFullUrl());
 
         return new Bundle.Entry().setFullUrl(createFullUrl(patient)).setResource(patient);
@@ -97,7 +97,8 @@ public class BundleFactory {
         return humanNameDt;
     }
 
-    private static ContactPointDt createEmail(String email) {
+    private static Patient.Contact createEmail(String email) {
+        Patient.Contact contact;
         ContactPointDt contactPointDt;
 
         contactPointDt = new ContactPointDt();
@@ -105,7 +106,10 @@ public class BundleFactory {
         contactPointDt.setValue(email);
         contactPointDt.setUse(ContactPointUseEnum.HOME);
 
-        return contactPointDt;
+        contact = new Patient.Contact();
+        contact.addTelecom(contactPointDt);
+
+        return contact;
     }
 
     private static Bundle.Entry createAppointment(Bundle.Entry patient, String type, String description) {
