@@ -1,4 +1,4 @@
-package org.nds.dhp.manager;
+package org.nds.dhp.service;
 
 import ca.uhn.fhir.rest.client.api.Header;
 import org.apache.http.HttpEntity;
@@ -11,17 +11,17 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class HttpClientManager {
+public class HttpClientService {
 
-    private static Logger logger = LoggerFactory.getLogger(HttpClientManager.class);
+    private static Logger logger = LoggerFactory.getLogger(HttpClientService.class);
 
     private HttpClient httpClient;
 
-    public HttpClientManager() {
+    public HttpClientService() {
         httpClient = HttpClientBuilder.create().build();
     }
 
-    public HttpClientManager(HttpClient httpClient) {
+    public HttpClientService(HttpClient httpClient) {
         this.httpClient = httpClient;
     }
 

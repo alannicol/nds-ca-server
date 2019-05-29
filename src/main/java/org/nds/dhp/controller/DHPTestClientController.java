@@ -9,8 +9,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.nds.dhp.factory.BundleFactory;
-import org.nds.dhp.manager.AccessTokenManager;
-import org.nds.dhp.manager.HttpClientManager;
+import org.nds.dhp.service.AccessTokenService;
+import org.nds.dhp.service.HttpClientService;
 import org.nds.dhp.model.DHPTestClient;
 import org.nds.dhp.util.MessageParser;
 import org.nds.dhp.util.ServerProperty;
@@ -24,13 +24,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Controller
 public class DHPTestClientController {
 
-    private static Logger logger = LoggerFactory.getLogger(AccessTokenManager.class);
+    private static Logger logger = LoggerFactory.getLogger(AccessTokenService.class);
     private static String data = "<Bundle xmlns=\"http://hl7.org/fhir\"><id value=\"83e3f864-718e-11e9-9071-525400fdb384\"></id><type value=\"message\"></type><entry><fullUrl value=\"urn:uuid:83e41826-718e-11e9-9071-525400fdb384\"></fullUrl><resource><MessageHeader><id value=\"83e41826-718e-11e9-9071-525400fdb384\"></id><timestamp value=\"2019-05-01T09:14:05Z\"></timestamp><event><system value=\"https://digitalhealthplatform.scot/fhir/messagetypes\"></system><code value=\"DvaNotif\"></code></event><source><name value=\"Hub\"></name><endpoint value=\"http://hub/\"></endpoint></source><destination><name value=\"DHP\"></name><endpoint value=\"http://dhp/\"></endpoint></destination><data><reference value=\"urn:uuid:83e429c4-718e-11e9-9071-525400fdb384\"></reference></data><data><reference value=\"urn:uuid:83e4212c-718e-11e9-9071-525400fdb384\"></reference></data><data><reference value=\"urn:uuid:83e4311c-718e-11e9-9071-525400fdb384\"></reference></data></MessageHeader></resource></entry><entry><fullUrl value=\"urn:uuid:83e4212c-718e-11e9-9071-525400fdb384\"></fullUrl><resource><Appointment><id value=\"83e4212c-718e-11e9-9071-525400fdb384\"></id><meta><profile value=\"https://digitalhealthplatform.scot/fhir/DhpAppointment\"></profile></meta><contained><Practitioner><id value=\"prac\"></id><identifier><system value=\"https://digitalhealthplatform.scot/fhir/coresystems/ggctrakconsultingdoctor\"></system><value value=\"NUR998\"></value></identifier><name><text value=\"Nurse Gillian McCormick\"></text></name></Practitioner></contained><identifier><system value=\"https://digitalhealthplatform.scot/fhir/coresystems/ggctrakuniqueapptid\"></system><value value=\"27165-19509-1\"></value></identifier><identifier><system value=\"https://digitalhealthplatform.scot/fhir/coresystems/ggctrakcontrolId\"></system><value value=\"5627615414988\"></value></identifier><identifier><system value=\"https://digitalhealthplatform.scot/fhir/coresystems/ggctrakvisitnumberId\"></system><value value=\"O0015512368\"></value></identifier><status value=\"booked\"></status><type><text value=\"Dermatology Virtual\"></text></type><description value=\"GRGMDEV9-NURSE MCCORMICK DERM VIRTUAL ONLINE FRI AM\"></description><start value=\"2019-06-14T08:00:00Z\"></start><participant><actor><reference value=\"urn:uuid:83e429c4-718e-11e9-9071-525400fdb384\"></reference></actor><status value=\"accepted\"></status></participant><participant><actor><reference value=\"#prac\"></reference></actor><status value=\"accepted\"></status></participant></Appointment></resource></entry><entry><fullUrl value=\"urn:uuid:83e429c4-718e-11e9-9071-525400fdb384\"></fullUrl><resource><Patient><id value=\"83e429c4-718e-11e9-9071-525400fdb384\"></id><identifier><system value=\"https://phfapi.digitalhealthplatform.net/fhir/chinumber\"></system><value value=\"0109560000\"></value></identifier><name><family value=\"Hscpportal\"></family><given value=\"Test Two\"></given></name><telecom><system value=\"email\"></system><value value=\"HSCPortalTest2@gmail.com\"></value><use value=\"home\"></use></telecom><birthDate value=\"1956-09-01\"></birthDate><careProvider><reference value=\"urn:uuid:83e4311c-718e-11e9-9071-525400fdb384\"></reference></careProvider></Patient></resource></entry><entry><fullUrl value=\"urn:uuid:83e4311c-718e-11e9-9071-525400fdb384\"></fullUrl><resource><Organization><id value=\"83e4311c-718e-11e9-9071-525400fdb384\"></id><identifier><system value=\"https://digitalhealthplatform.scot/fhir/GpPracticeCode\"></system><value value=\"54321\"></value></identifier><name value=\"Alba House\"></name></Organization></resource></entry></Bundle>";
 
     private static final String AUTHORIZATION = "Authorization";
@@ -39,18 +40,19 @@ public class DHPTestClientController {
     private static final String FHIR_JSON="application/json+fhir";
     private static final String FHIR_XML="application/xml+fhir";
 
-    private AccessTokenManager accessTokenManager;
-    private HttpClientManager httpClientManager;
+    private AccessTokenService accessTokenService;
+    private HttpClientService httpClientService;
     private ExecutorService executor;
 
     private DHPTestClient dhpTestClient = new DHPTestClient();
 
     private int currentMessageType=1;
     private int currentMessageFormat=1;
+    private String currentUUID;
 
     public DHPTestClientController() {
-        accessTokenManager = new AccessTokenManager();
-        httpClientManager = new HttpClientManager();
+        accessTokenService = new AccessTokenService();
+        httpClientService = new HttpClientService();
 
         executor = Executors.newSingleThreadExecutor();
     }
@@ -82,13 +84,13 @@ public class DHPTestClientController {
 
         try {
 
-            token = accessTokenManager.request();
+            token = accessTokenService.request();
 
-            httpPost = httpClientManager.createHttpPost(ServerProperty.getMessageEndpoint(), createHeaders(token, messageFormat), new StringEntity(createBundleRequest(messageType, messageFormat)));
+            httpPost = httpClientService.createHttpPost(ServerProperty.getMessageEndpoint(), createHeaders(token, messageFormat), new StringEntity(createBundleRequest(messageType, messageFormat)));
 
             displayRequest(httpPost);
 
-            httpResponse = httpClientManager.post(httpPost);
+            httpResponse = httpClientService.post(httpPost);
 
             displayResponse(httpResponse);
 
@@ -103,9 +105,10 @@ public class DHPTestClientController {
         String request=null;
 
         if(messageType == 1) {
-            bundle = BundleFactory.createDvaNotif();
+            currentUUID = UUID.randomUUID().toString();
+            bundle = BundleFactory.createDvaNotif(currentUUID);
         } else if(messageType == 2) {
-            bundle = BundleFactory.createDvaNotifR_Response();
+            bundle = BundleFactory.createDvaNotifR_Response(currentUUID);
         }
 
         if(messageFormat == 1) {

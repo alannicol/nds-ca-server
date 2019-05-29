@@ -18,14 +18,14 @@ public class BundleFactory {
     private static final String FULL_URL="urn:uuid:";
     private static final String DVA_NOTIF_RESPONSE_RESOURCE="src/main/resources/application.pdf";
 
-    public static Bundle createDvaNotif() {
+    public static Bundle createDvaNotif(String uuid) {
         Bundle bundle;
         Bundle.Entry organization;
         Bundle.Entry patient;
         Bundle.Entry appointment;
         Bundle.Entry messageHeader;
 
-        bundle = createBundle();
+        bundle = createBundle(uuid);
         organization = createOrganization("99999", "Alba House");
         patient = createPatient(organization,"0109560000","HSCPortal","Testtwo","HSCPortalTest2@gmail.com");
         appointment = createAppointment(patient,"Dermatology Virtual","A Dermatology virtual appointment has been scheduled for you.");
@@ -39,14 +39,14 @@ public class BundleFactory {
         return bundle;
     }
 
-    public static Bundle createDvaNotifR_Response() throws Exception {
+    public static Bundle createDvaNotifR_Response(String uuid) throws Exception {
         Bundle bundle;
         Bundle.Entry documentReference;
         Bundle.Entry messageHeader;
 
-        bundle = createBundle();
+        bundle = createBundle(uuid);
         documentReference = createDocumentReference("Consultant Report", obtainPdfData(), "Consultant Report");
-        messageHeader = createMessageHeader(documentReference, "DvaNotif", "NSS HUB", "DHP");
+        messageHeader = createMessageHeader(documentReference, "DvaNotifR_Response", "Lenus", "DHP");
 
         bundle.addEntry(messageHeader);
         bundle.addEntry(documentReference);
@@ -54,11 +54,11 @@ public class BundleFactory {
         return bundle;
     }
 
-    private static Bundle createBundle() {
+    private static Bundle createBundle(String uuid) {
         Bundle bundle;
 
         bundle = new Bundle();
-        bundle.setId(new IdDt(UUID.randomUUID().toString()));
+        bundle.setId(new IdDt(uuid));
         bundle.setType(BundleTypeEnum.MESSAGE);
 
         return bundle;

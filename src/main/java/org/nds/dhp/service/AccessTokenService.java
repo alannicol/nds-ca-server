@@ -1,4 +1,4 @@
-package org.nds.dhp.manager;
+package org.nds.dhp.service;
 
 import ca.uhn.fhir.rest.client.api.Header;
 import io.jsonwebtoken.Jwts;
@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-public class AccessTokenManager {
+public class AccessTokenService {
 
-    private static Logger logger = LoggerFactory.getLogger(AccessTokenManager.class);
+    private static Logger logger = LoggerFactory.getLogger(AccessTokenService.class);
 
     private static final String ACCESS_TOKEN = "access_token";
     private static final String ACCESS_TOKEN_REQUEST_BODY = "client_id=%1$s&client_secret=%2$s";
@@ -72,13 +72,13 @@ public class AccessTokenManager {
     }
 
     private static String requestAccessToken() throws Exception {
-        HttpClientManager httpClientManager;
+        HttpClientService httpClientService;
         HttpResponse httpResponse;
         String response;
 
-        httpClientManager = new HttpClientManager();
+        httpClientService = new HttpClientService();
 
-        httpResponse = httpClientManager.post(ServerProperty.getTokenServiceUrl(), createHeaders(), new StringEntity(createAccessTokenRequestBody()));
+        httpResponse = httpClientService.post(ServerProperty.getTokenServiceUrl(), createHeaders(), new StringEntity(createAccessTokenRequestBody()));
 
         response = EntityUtils.toString(httpResponse.getEntity());
 

@@ -3,6 +3,7 @@ package org.nds.dhp.model;
 public class DHPTestClient {
 
     private String endPoint;
+    private String UUID;
     private int messageType;
     private int messageFormat;
     private String requestHeader;
