@@ -25,11 +25,11 @@ public class BundleFactory {
         Bundle.Entry appointment;
         Bundle.Entry messageHeader;
 
-        bundle = createBundle(uuid);
+        bundle = createBundle();
         organization = createOrganization("99999", "Alba House");
         patient = createPatient(organization,"0109560000","HSCPortal","Testtwo","HSCPortalTest2@gmail.com");
         appointment = createAppointment(patient,"Dermatology Virtual","A Dermatology virtual appointment has been scheduled for you.");
-        messageHeader = createMessageHeader(appointment, patient, organization, "DvaNotif", "NSS HUB", "DHP");
+        messageHeader = createMessageHeader(uuid,appointment, patient, organization, "DvaNotif", "NSS HUB", "DHP");
 
         bundle.addEntry(messageHeader);
         bundle.addEntry(appointment);
@@ -44,9 +44,9 @@ public class BundleFactory {
         Bundle.Entry documentReference;
         Bundle.Entry messageHeader;
 
-        bundle = createBundle(uuid);
+        bundle = createBundle();
         documentReference = createDocumentReference("Consultant Report", obtainPdfData(), "Consultant Report");
-        messageHeader = createMessageHeader(documentReference, "DvaNotifR_Response", "Lenus", "DHP");
+        messageHeader = createMessageHeader(uuid,documentReference, "DvaNotifR_Response", "Lenus", "DHP");
 
         bundle.addEntry(messageHeader);
         bundle.addEntry(documentReference);
@@ -54,11 +54,11 @@ public class BundleFactory {
         return bundle;
     }
 
-    private static Bundle createBundle(String uuid) {
+    private static Bundle createBundle() {
         Bundle bundle;
 
         bundle = new Bundle();
-        bundle.setId(new IdDt(uuid));
+        bundle.setId(UUID.randomUUID().toString());
         bundle.setType(BundleTypeEnum.MESSAGE);
 
         return bundle;
@@ -166,11 +166,11 @@ public class BundleFactory {
         return identifierDt;
     }
 
-    private static MessageHeader createMessageHeader(String event, String source, String destination) {
+    private static MessageHeader createMessageHeader(String uuid, String event, String source, String destination) {
         MessageHeader messageHeader;
 
         messageHeader = new MessageHeader();
-        messageHeader.setId(new IdDt(UUID.randomUUID().toString()));
+        messageHeader.setId(uuid);
         messageHeader.setTimestamp(new Date(), TemporalPrecisionEnum.SECOND);
         messageHeader.setEvent(createEvent("https://digitalhealthplatform.scot/fhir/messagetypes", event));
         messageHeader.setSource(createSource(source));
@@ -179,11 +179,11 @@ public class BundleFactory {
         return messageHeader;
     }
 
-    private static Bundle.Entry createMessageHeader(Bundle.Entry appointment, Bundle.Entry patient, Bundle.Entry organization, String event, String source, String
+    private static Bundle.Entry createMessageHeader(String uuid, Bundle.Entry appointment, Bundle.Entry patient, Bundle.Entry organization, String event, String source, String
             destination) {
         MessageHeader messageHeader;
 
-        messageHeader = createMessageHeader(event, source, destination);
+        messageHeader = createMessageHeader(uuid, event, source, destination);
 
         messageHeader.addData().setReference(appointment.getFullUrl());
         messageHeader.addData().setReference(patient.getFullUrl());
@@ -192,22 +192,22 @@ public class BundleFactory {
         return new Bundle.Entry().setFullUrl(createFullUrl(messageHeader)).setResource(messageHeader);
     }
 
-    private static Bundle.Entry createMessageHeader(Bundle.Entry documentReference, String event, String source, String destination) {
+    private static Bundle.Entry createMessageHeader(String uuid, Bundle.Entry documentReference, String event, String source, String destination) {
         MessageHeader messageHeader;
 
-        messageHeader = createMessageHeader(event, source, destination);
-        messageHeader.setResponse(createResponse());
+        messageHeader = createMessageHeader(new IdDt(UUID.randomUUID().toString()).getValue(), event, source, destination);
+        messageHeader.setResponse(createResponse(uuid));
 
         messageHeader.addData().setReference(documentReference.getFullUrl());
 
         return new Bundle.Entry().setFullUrl(createFullUrl(messageHeader)).setResource(messageHeader);
     }
 
-    private static MessageHeader.Response createResponse() {
+    private static MessageHeader.Response createResponse(String uuid) {
         MessageHeader.Response response;
 
         response = new MessageHeader.Response();
-        response.setIdentifier(new IdDt(UUID.randomUUID().toString()));
+        response.setIdentifier(uuid);
         response.setCode(ResponseTypeEnum.OK);
 
         return response;
