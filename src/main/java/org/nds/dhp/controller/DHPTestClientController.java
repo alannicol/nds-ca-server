@@ -57,7 +57,7 @@ public class DHPTestClientController {
         executor = Executors.newSingleThreadExecutor();
     }
 
-    @GetMapping("/dhptestclient")
+    @GetMapping("/")
     public String handleGetRequest(Model model) {
         dhpTestClient.setMessageType(currentMessageType);
         dhpTestClient.setMessageFormat(currentMessageFormat);
@@ -67,7 +67,7 @@ public class DHPTestClientController {
         return "DHPTestClient";
     }
 
-    @PostMapping("/dhptestclient")
+    @PostMapping("/")
     public String handlePostRequest(@ModelAttribute("dhptestclient") DHPTestClient dhpTestClient, Model model) {
 
         currentMessageType = dhpTestClient.getMessageType();
