@@ -18,6 +18,11 @@ public class BundleFactory {
     private static final String FULL_URL="urn:uuid:";
     private static final String DVA_NOTIF_RESPONSE_RESOURCE="src/main/resources/application.pdf";
 
+    private static final String LINE_1="19 Patient Portal,Glasgow,,Unknown";
+    private static final String LINE_2="Nk010aa";
+    private static final String UNKNOWN="Unknown";
+    private static final String POSTAL_CODE="NK010AA";
+
     public static Bundle createDvaNotif(String uuid) {
         Bundle bundle;
         Bundle.Entry organization;
@@ -71,6 +76,7 @@ public class BundleFactory {
         patient.setId(new IdDt(UUID.randomUUID().toString()));
         patient.addIdentifier(createPatientIdentifier("https://phfapi.digitalhealthplatform.net/fhir/chinumber", patientIdentifier));
         patient.addName(createName(familyName,givenName));
+        patient.addAddress(createAddress());
         patient.setTelecom(createEmail(email));
         patient.addCareProvider().setReference(organization.getFullUrl());
 
@@ -95,6 +101,20 @@ public class BundleFactory {
         humanNameDt.addGiven(new StringDt(given));
 
         return humanNameDt;
+    }
+
+    private static AddressDt createAddress() {
+        AddressDt addressDt;
+
+        addressDt = new AddressDt();
+        addressDt.setUse(AddressUseEnum.HOME);
+        addressDt.setType(AddressTypeEnum.POSTAL);
+        addressDt.addLine(LINE_1);
+        addressDt.addLine(LINE_2);
+        addressDt.setCity(UNKNOWN);
+        addressDt.setPostalCode(POSTAL_CODE);
+
+        return addressDt;
     }
 
     private static List<ContactPointDt> createEmail(String email) {
