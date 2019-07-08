@@ -16,7 +16,7 @@ import java.util.*;
 public class BundleFactory {
 
     private static final String FULL_URL="urn:uuid:";
-    private static final String DVA_NOTIF_RESPONSE_RESOURCE="src/main/resources/application.pdf";
+    private static final String DVA_NOTIF_RESPONSE_RESOURCE="/application.pdf";
 
     private static final String LINE_1="19 Patient Portal,Glasgow,,Unknown";
     private static final String LINE_2="Nk010aa";
@@ -299,7 +299,7 @@ public class BundleFactory {
         File file;
         byte[] data;
 
-        file = new File(DVA_NOTIF_RESPONSE_RESOURCE);
+        file = new File(BundleFactory.class.getResource(DVA_NOTIF_RESPONSE_RESOURCE).toURI());
         data = Files.readAllBytes(file.toPath());
 
         return Base64.getEncoder().encode(data);
